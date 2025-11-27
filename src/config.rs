@@ -29,7 +29,13 @@ where
     /// - Gesture: 4x gain, 100mA LED, entry thresh 40, exit thresh 30
     ///
     /// After calling this, you should enable the specific engines you need.
+    ///
+    /// This function first probes the I2C bus to verify the device is present
+    /// before attempting configuration.
     pub fn init(&mut self) -> Result<(), Error<E>> {
+        // Probe the device to verify it's present before initialization
+        self.probe()?;
+        
         // Disable all features first
         self.disable()?;
 

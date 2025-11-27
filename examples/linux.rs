@@ -10,6 +10,7 @@ use linux_embedded_hal::I2cdev;
 fn main() {
     let dev = I2cdev::new("/dev/i2c-1").unwrap();
     let mut sensor = Apds9960::new(dev);
+    sensor.init().unwrap();
     sensor.enable().unwrap();
     
     // Set maximum light sensitivity

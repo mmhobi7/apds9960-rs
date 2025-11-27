@@ -460,6 +460,40 @@ where
     pub fn destroy(self) -> I2C {
         self.i2c
     }
+
+    /// Probe the I2C bus to check if the device is present at the expected address.
+    ///
+    /// This method performs a zero-length write operation to the device address,
+    /// similar to how `i2cdetect` checks for device presence. This is useful for
+    /// verifying the device is connected before attempting full initialization.
+    ///
+    /// # Returns
+    /// - `Ok(())` if the device acknowledges (is present and responding)
+    /// - `Err(Error::I2C(e))` if the device does not acknowledge or there's a communication error
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use apds9960::Apds9960;
+    /// # use linux_embedded_hal::I2cdev;
+    /// let dev = I2cdev::new("/dev/i2c-1").unwrap();
+    /// let mut sensor = Apds9960::new(dev);
+    ///
+    /// // Check if device is present before initializing
+    /// match sensor.probe() {
+    ///     Ok(()) => {
+    ///         println!("APDS9960 device found at address 0x39");
+    ///         sensor.init().unwrap();
+    ///     }
+    ///     Err(_) => {
+    ///         println!("APDS9960 device not found!");
+    ///     }
+    /// }
+    /// ```
+    pub fn probe(&mut self) -> Result<(), Error<E>> {
+        // Perform a zero-length write to check device presence
+        // This mimics i2cdetect's behavior for device detection
+        self.i2c.write(DEV_ADDR, &[]).map_err(Error::I2C)
+    }
 }
 
 mod config;
