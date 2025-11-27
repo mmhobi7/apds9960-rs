@@ -7,7 +7,7 @@ use {
 /// Gesture engine configuration.
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::Write<Error = E>,
+    I2C: i2c::Write<Error = E> + i2c::WriteRead<Error = E>,
 {
     /// Enable gesture detection
     pub fn enable_gesture(&mut self) -> Result<(), Error<E>> {
@@ -105,20 +105,12 @@ where
         offset_left: i8,
         offset_right: i8,
     ) -> Result<(), Error<E>> {
-        self.i2c
-            .write(
-                DEV_ADDR,
-                &[
-                    Register::GOFFSET_U,
-                    offset_up as u8,
-                    offset_down as u8,
-                    Register::GPULSE,  // Skip GPULSE register
-                    offset_left as u8,
-                    0,  // Skip register 0xA8
-                    offset_right as u8,
-                ],
-            )
-            .map_err(Error::I2C)
+        // Gesture offset registers are not sequential (GPULSE is at 0xA6 between them),
+        // so we need to write them individually
+        self.set_gesture_up_offset(offset_up)?;
+        self.set_gesture_down_offset(offset_down)?;
+        self.set_gesture_left_offset(offset_left)?;
+        self.set_gesture_right_offset(offset_right)
     }
 
     /// Enable all gesture photodiodes during gesture mode.
@@ -130,7 +122,11 @@ where
     ///
     /// * `up_down`: Enable up/down photodiodes (true) or disable (false)
     /// * `left_right`: Enable left/right photodiodes (true) or disable (false)
-    pub fn set_gesture_dimensions(&mut self, up_down: bool, left_right: bool) -> Result<(), Error<E>> {
+    pub fn set_gesture_dimensions(
+        &mut self,
+        up_down: bool,
+        left_right: bool,
+    ) -> Result<(), Error<E>> {
         let mut mask = 0u8;
         if !up_down {
             mask |= 0b0000_0011; // Disable up and down

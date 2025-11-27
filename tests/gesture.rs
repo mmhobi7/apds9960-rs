@@ -43,14 +43,12 @@ write_test!(set_goffset_r, set_gesture_right_offset, GOFFSET_R, 55, 55);
 
 #[test]
 fn can_set_goffsets() {
-    let data = vec![
-        Register::GOFFSET_U,
-        55,
-        i8::from(-56) as u8,
-        100,
-        i8::from(-101) as u8,
+    let trans = [
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_U, 55]),
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_D, i8::from(-56) as u8]),
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_L, 100]),
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_R, i8::from(-101) as u8]),
     ];
-    let trans = [I2cTrans::write(DEV_ADDR, data)];
     let mut sensor = new(&trans);
     sensor.set_gesture_offsets(55, -56, 100, -101).unwrap();
     destroy(sensor);

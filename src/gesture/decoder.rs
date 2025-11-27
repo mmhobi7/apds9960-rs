@@ -78,10 +78,8 @@ where
             ((first[0] as i32 - first[1] as i32) * 100) / (first[0] as i32 + first[1] as i32);
         let f_r_lr =
             ((first[2] as i32 - first[3] as i32) * 100) / (first[2] as i32 + first[3] as i32);
-        let l_r_ud =
-            ((last[0] as i32 - last[1] as i32) * 100) / (last[0] as i32 + last[1] as i32);
-        let l_r_lr =
-            ((last[2] as i32 - last[3] as i32) * 100) / (last[2] as i32 + last[3] as i32);
+        let l_r_ud = ((last[0] as i32 - last[1] as i32) * 100) / (last[0] as i32 + last[1] as i32);
+        let l_r_lr = ((last[2] as i32 - last[3] as i32) * 100) / (last[2] as i32 + last[3] as i32);
 
         let delta_ud = l_r_ud - f_r_ud;
         let delta_lr = l_r_lr - f_r_lr;

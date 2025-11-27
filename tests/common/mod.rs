@@ -29,8 +29,8 @@ impl Register {
     pub const GCONFIG1: u8 = 0xA2;
     pub const GOFFSET_U: u8 = 0xA4;
     pub const GOFFSET_D: u8 = 0xA5;
-    pub const GOFFSET_L: u8 = 0xA6;
-    pub const GOFFSET_R: u8 = 0xA7;
+    pub const GOFFSET_L: u8 = 0xA7;
+    pub const GOFFSET_R: u8 = 0xA9;
     pub const GCONFIG4: u8 = 0xAB;
     pub const GFLVL: u8 = 0xAE;
     pub const GSTATUS: u8 = 0xAF;
