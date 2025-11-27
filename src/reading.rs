@@ -1,9 +1,9 @@
-use hal::blocking::i2c;
+use hal::i2c;
 use {Apds9960, Error, Register, DEV_ADDR};
 
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::WriteRead<Error = E>,
+    I2C: i2c::I2c<Error = E>,
 {
     /// Read the device ID.
     ///

@@ -1,7 +1,7 @@
 extern crate apds9960;
 use apds9960::GestureDataThreshold;
 extern crate embedded_hal_mock as hal;
-use hal::i2c::Transaction as I2cTrans;
+use hal::eh1::i2c::Transaction as I2cTrans;
 mod common;
 use common::{destroy, new, BitFlags, Register, DEV_ADDR};
 
@@ -21,6 +21,12 @@ write_test!(
     BitFlags::GIEN
 );
 write_test!(dis_gesture_int, disable_gesture_interrupts, GCONFIG4, 0);
+write_test!(
+    can_clear_gesture_fifo,
+    clear_gesture_fifo,
+    GCONFIG4,
+    BitFlags::GFIFO_CLR
+);
 write_test!(
     can_set_gprox_entry_th,
     set_gesture_proximity_entry_threshold,
@@ -43,14 +49,12 @@ write_test!(set_goffset_r, set_gesture_right_offset, GOFFSET_R, 55, 55);
 
 #[test]
 fn can_set_goffsets() {
-    let data = vec![
-        Register::GOFFSET_U,
-        55,
-        i8::from(-56) as u8,
-        100,
-        i8::from(-101) as u8,
+    let trans = [
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_U, 55]),
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_D, i8::from(-56) as u8]),
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_L, 100]),
+        I2cTrans::write(DEV_ADDR, vec![Register::GOFFSET_R, i8::from(-101) as u8]),
     ];
-    let trans = [I2cTrans::write(DEV_ADDR, data)];
     let mut sensor = new(&trans);
     sensor.set_gesture_offsets(55, -56, 100, -101).unwrap();
     destroy(sensor);

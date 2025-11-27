@@ -1,5 +1,5 @@
 use apds9960::Apds9960;
-use hal::i2c::{Mock as I2cMock, Transaction as I2cTrans};
+use hal::eh1::i2c::{Mock as I2cMock, Transaction as I2cTrans};
 
 pub const DEV_ADDR: u8 = 0x39;
 
@@ -29,8 +29,8 @@ impl Register {
     pub const GCONFIG1: u8 = 0xA2;
     pub const GOFFSET_U: u8 = 0xA4;
     pub const GOFFSET_D: u8 = 0xA5;
-    pub const GOFFSET_L: u8 = 0xA6;
-    pub const GOFFSET_R: u8 = 0xA7;
+    pub const GOFFSET_L: u8 = 0xA7;
+    pub const GOFFSET_R: u8 = 0xA9;
     pub const GCONFIG4: u8 = 0xAB;
     pub const GFLVL: u8 = 0xAE;
     pub const GSTATUS: u8 = 0xAF;
@@ -60,6 +60,7 @@ impl BitFlags {
     pub const GIEN: u8 = 1 << 1;
     pub const GVALID: u8 = 1;
     pub const GFOV: u8 = 1 << 1;
+    pub const GFIFO_CLR: u8 = 1 << 2;
     pub const GFIFOTH1: u8 = 1 << 7;
     pub const GFIFOTH0: u8 = 1 << 6;
 }

@@ -1,4 +1,4 @@
-use hal::blocking::i2c;
+use hal::i2c;
 use {
     register::{Enable, GConfig1, GConfig4},
     Apds9960, BitFlags, Error, GestureDataThreshold, Register, DEV_ADDR,
@@ -7,7 +7,7 @@ use {
 /// Gesture engine configuration.
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::Write<Error = E>,
+    I2C: i2c::I2c<Error = E>,
 {
     /// Enable gesture detection
     pub fn enable_gesture(&mut self) -> Result<(), Error<E>> {
@@ -74,7 +74,7 @@ where
 
     /// Set the gesture proximity exit threshold.
     pub fn set_gesture_proximity_exit_threshold(&mut self, threshold: u8) -> Result<(), Error<E>> {
-        self.write_register(Register::GPEXTH, threshold)
+        self.write_register(Register::GEXTH, threshold)
     }
 
     /// Set the gesture up offset.
@@ -105,17 +105,84 @@ where
         offset_left: i8,
         offset_right: i8,
     ) -> Result<(), Error<E>> {
-        self.i2c
-            .write(
-                DEV_ADDR,
-                &[
-                    Register::GOFFSET_U,
-                    offset_up as u8,
-                    offset_down as u8,
-                    offset_left as u8,
-                    offset_right as u8,
-                ],
-            )
-            .map_err(Error::I2C)
+        // Gesture offset registers are not sequential (GPULSE is at 0xA6 between them),
+        // so we need to write them individually
+        self.set_gesture_up_offset(offset_up)?;
+        self.set_gesture_down_offset(offset_down)?;
+        self.set_gesture_left_offset(offset_left)?;
+        self.set_gesture_right_offset(offset_right)
+    }
+
+    /// Enable all gesture photodiodes during gesture mode.
+    pub fn enable_all_gesture_photodiodes(&mut self) -> Result<(), Error<E>> {
+        self.write_register(Register::GCONF3, 0)
+    }
+
+    /// Set gesture photodiode dimensions.
+    ///
+    /// * `up_down`: Enable up/down photodiodes (true) or disable (false)
+    /// * `left_right`: Enable left/right photodiodes (true) or disable (false)
+    pub fn set_gesture_dimensions(
+        &mut self,
+        up_down: bool,
+        left_right: bool,
+    ) -> Result<(), Error<E>> {
+        let mut mask = 0u8;
+        if !up_down {
+            mask |= 0b0000_0011; // Disable up and down
+        }
+        if !left_right {
+            mask |= 0b0000_1100; // Disable left and right
+        }
+        self.write_register(Register::GCONF3, mask)
+    }
+
+    /// Clear gesture FIFO and interrupt.
+    ///
+    /// This clears the gesture FIFO and gesture interrupt, similar to the Python implementation.
+    pub fn clear_gesture_fifo(&mut self) -> Result<(), Error<E>> {
+        self.set_flag_gconfig4(GConfig4::GFIFO_CLR, true)
+    }
+}
+
+impl<I2C, E> Apds9960<I2C>
+where
+    I2C: i2c::I2c<Error = E>,
+{
+    /// Set gesture exit persistence.
+    ///
+    /// Number of consecutive gesture end occurrences to exit gesture mode.
+    /// * `persistence`: 1, 2, 4, or 7 consecutive occurrences
+    pub fn set_gesture_exit_persistence(&mut self, persistence: u8) -> Result<(), Error<E>> {
+        let value = match persistence {
+            1 => 0b00,
+            2 => 0b01,
+            4 => 0b10,
+            7 => 0b11,
+            _ => 0b01, // default to 2
+        };
+        let mut gconf1 = self.read_register(Register::GCONF1)?;
+        gconf1 = (gconf1 & 0x9F) | (value << 5);
+        self.write_register(Register::GCONF1, gconf1)
+    }
+
+    /// Set gesture exit mask.
+    ///
+    /// Determines which photodiode pairs are included in gesture exit comparison.
+    /// * `mask`: Bitmask where bit 0=UD, 1=LR, 2=Both, 3=All
+    pub fn set_gesture_exit_mask(&mut self, mask: u8) -> Result<(), Error<E>> {
+        let mut gconf1 = self.read_register(Register::GCONF1)?;
+        gconf1 = (gconf1 & 0xE7) | ((mask & 0x03) << 3);
+        self.write_register(Register::GCONF1, gconf1)
+    }
+
+    /// Read gesture enter threshold.
+    pub fn get_gesture_proximity_entry_threshold(&mut self) -> Result<u8, Error<E>> {
+        self.read_register(Register::GPENTH)
+    }
+
+    /// Read gesture exit threshold.
+    pub fn get_gesture_proximity_exit_threshold(&mut self) -> Result<u8, Error<E>> {
+        self.read_register(Register::GEXTH)
     }
 }
