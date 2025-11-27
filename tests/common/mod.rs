@@ -60,6 +60,7 @@ impl BitFlags {
     pub const GIEN: u8 = 1 << 1;
     pub const GVALID: u8 = 1;
     pub const GFOV: u8 = 1 << 1;
+    pub const GFIFO_CLR: u8 = 1 << 2;
     pub const GFIFOTH1: u8 = 1 << 7;
     pub const GFIFOTH0: u8 = 1 << 6;
 }

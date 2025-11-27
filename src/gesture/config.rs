@@ -136,6 +136,13 @@ where
         }
         self.write_register(Register::GCONF3, mask)
     }
+
+    /// Clear gesture FIFO and interrupt.
+    ///
+    /// This clears the gesture FIFO and gesture interrupt, similar to the Python implementation.
+    pub fn clear_gesture_fifo(&mut self) -> Result<(), Error<E>> {
+        self.set_flag_gconfig4(GConfig4::GFIFO_CLR, true)
+    }
 }
 
 impl<I2C, E> Apds9960<I2C>

@@ -63,6 +63,7 @@
 //! - Set/get gesture mode. See: [`get_gesture_mode()`], [`set_gesture_mode()`].
 //! - Decode gesture with advanced algorithm. See: [`decode_gesture()`].
 //! - Set/get rotation. See: [`set_rotation()`], [`rotation()`].
+//! - Clear gesture FIFO. See: [`clear_gesture_fifo()`].
 //! - Check if gesture is available. See: [`is_gesture_available()`].
 //! - Read gesture with FIFO processing. See: [`read_gesture()`].
 //!
@@ -415,6 +416,7 @@ mod register {
     impl GConfig4 {
         pub const GMODE: u8 = 0b0000_0001;
         pub const GIEN: u8 = 0b0000_0010;
+        pub const GFIFO_CLR: u8 = 0b0000_0100;
     }
     impl_bitflags!(GConfig4, GCONFIG4);
 

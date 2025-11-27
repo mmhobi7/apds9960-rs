@@ -22,6 +22,12 @@ write_test!(
 );
 write_test!(dis_gesture_int, disable_gesture_interrupts, GCONFIG4, 0);
 write_test!(
+    can_clear_gesture_fifo,
+    clear_gesture_fifo,
+    GCONFIG4,
+    BitFlags::GFIFO_CLR
+);
+write_test!(
     can_set_gprox_entry_th,
     set_gesture_proximity_entry_threshold,
     GPENTH,
