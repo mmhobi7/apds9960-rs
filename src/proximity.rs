@@ -1,6 +1,6 @@
 use hal::blocking::i2c;
 use {
-    register::{Config2, Enable, Status},
+    register::{Config2, Config3, Enable, Pers, Status},
     Apds9960, BitFlags, Error, Register, DEV_ADDR,
 };
 
@@ -75,6 +75,50 @@ where
                 ],
             )
             .map_err(Error::I2C)
+    }
+
+    /// Set proximity interrupt persistence.
+    ///
+    /// This value controls how many consecutive out-of-threshold measurements
+    /// are required before triggering a proximity interrupt.
+    ///
+    /// * `cycles`: Number of consecutive cycles (0-15)
+    pub fn set_proximity_interrupt_persistence(&mut self, cycles: u8) -> Result<(), Error<E>> {
+        let mut pers = self.read_register(Register::PERS)?;
+        pers = (pers & !Pers::PPERS_MASK) | ((cycles & 0x0F) << Pers::PPERS_SHIFT);
+        self.write_register(Register::PERS, pers)
+    }
+
+    /// Get proximity interrupt persistence.
+    pub fn get_proximity_interrupt_persistence(&mut self) -> Result<u8, Error<E>> {
+        let pers = self.read_register(Register::PERS)?;
+        Ok((pers & Pers::PPERS_MASK) >> Pers::PPERS_SHIFT)
+    }
+
+    /// Enable proximity gain compensation.
+    pub fn enable_proximity_gain_compensation(&mut self) -> Result<(), Error<E>> {
+        self.set_flag_config3(Config3::PCMP, true)
+    }
+
+    /// Disable proximity gain compensation.
+    pub fn disable_proximity_gain_compensation(&mut self) -> Result<(), Error<E>> {
+        self.set_flag_config3(Config3::PCMP, false)
+    }
+
+    /// Set proximity photodiode mask.
+    ///
+    /// Each bit masks a photodiode: bit 0=Right, 1=Left, 2=Down, 3=Up
+    /// Setting a bit to 1 disables that photodiode.
+    pub fn set_proximity_photodiode_mask(&mut self, mask: u8) -> Result<(), Error<E>> {
+        let mut config3 = self.read_register(Register::CONFIG3)?;
+        config3 = (config3 & 0xF0) | (mask & 0x0F);
+        self.write_register(Register::CONFIG3, config3)
+    }
+
+    /// Get proximity photodiode mask.
+    pub fn get_proximity_photodiode_mask(&mut self) -> Result<u8, Error<E>> {
+        let config3 = self.read_register(Register::CONFIG3)?;
+        Ok(config3 & 0x0F)
     }
 
     /// Clear proximity interrupt.

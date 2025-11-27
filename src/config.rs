@@ -88,6 +88,7 @@ where
     impl_set_flag_reg!(set_flag_enable, enable);
     impl_set_flag_reg!(set_flag_config1, config1);
     impl_set_flag_reg!(set_flag_config2, config2);
+    impl_set_flag_reg!(set_flag_config3, config3);
     impl_set_flag_reg!(set_flag_gconfig4, gconfig4);
 
     pub(crate) fn config_register<T: BitFlags>(&mut self, reg: &T) -> Result<(), Error<E>> {

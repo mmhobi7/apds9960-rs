@@ -1,6 +1,6 @@
 use hal::blocking::i2c;
 use {
-    register::{Config2, Enable, Status},
+    register::{Config2, Enable, Pers, Status},
     Apds9960, BitFlags, Error, LightData, Register,
 };
 
@@ -62,6 +62,24 @@ where
     /// than this value.
     pub fn set_light_high_threshold(&mut self, threshold: u16) -> Result<(), Error<E>> {
         self.write_double_register(Register::AIHTL, threshold)
+    }
+
+    /// Set ambient light interrupt persistence.
+    ///
+    /// This value controls how many consecutive out-of-threshold measurements
+    /// are required before triggering an ambient light interrupt.
+    ///
+    /// * `cycles`: Number of consecutive cycles (0-15)
+    pub fn set_light_interrupt_persistence(&mut self, cycles: u8) -> Result<(), Error<E>> {
+        let mut pers = self.read_register(Register::PERS)?;
+        pers = (pers & !Pers::APERS_MASK) | (cycles & 0x0F);
+        self.write_register(Register::PERS, pers)
+    }
+
+    /// Get ambient light interrupt persistence.
+    pub fn get_light_interrupt_persistence(&mut self) -> Result<u8, Error<E>> {
+        let pers = self.read_register(Register::PERS)?;
+        Ok(pers & Pers::APERS_MASK)
     }
 
     /// Clear ambient light interrupt.

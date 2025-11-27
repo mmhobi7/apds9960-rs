@@ -186,6 +186,8 @@ extern crate nb;
 pub enum Error<E> {
     /// I²C bus error
     I2C(E),
+    /// Invalid rotation value was supplied to the gesture decoder.
+    InvalidRotation,
 }
 
 /// Gesture FIFO data threshold.
@@ -227,7 +229,9 @@ impl Register {
     const AIHTL: u8 = 0x86;
     const PILT: u8 = 0x89;
     const PIHT: u8 = 0x8B;
+    const PERS: u8 = 0x8C;
     const CONFIG1: u8 = 0x8D;
+    const PPULSE: u8 = 0x8E;
     const CONFIG2: u8 = 0x90;
     const ID: u8 = 0x92;
     const STATUS: u8 = 0x93;
@@ -238,13 +242,17 @@ impl Register {
     const PDATA: u8 = 0x9C;
     const POFFSET_UR: u8 = 0x9D;
     const POFFSET_DL: u8 = 0x9E;
+    const CONFIG3: u8 = 0x9F;
     const GPENTH: u8 = 0xA0;
     const GPEXTH: u8 = 0xA1;
     const GCONFIG1: u8 = 0xA2;
+    const GCONF2: u8 = 0xA3;
     const GOFFSET_U: u8 = 0xA4;
     const GOFFSET_D: u8 = 0xA5;
-    const GOFFSET_L: u8 = 0xA6;
-    const GOFFSET_R: u8 = 0xA7;
+    const GPULSE: u8 = 0xA6;
+    const GOFFSET_L: u8 = 0xA7;
+    const GOFFSET_R: u8 = 0xA9;
+    const GCONF3: u8 = 0xAA;
     const GCONFIG4: u8 = 0xAB;
     const GFLVL: u8 = 0xAE;
     const GSTATUS: u8 = 0xAF;
@@ -330,6 +338,32 @@ mod register {
         }
     }
 
+    #[derive(Debug)]
+    pub struct Config3(u8);
+    impl Config3 {
+        pub const PCMP: u8 = 0b0010_0000;
+        pub const PMASK_R: u8 = 0b0000_0001;
+        pub const PMASK_L: u8 = 0b0000_0010;
+        pub const PMASK_D: u8 = 0b0000_0100;
+        pub const PMASK_U: u8 = 0b0000_1000;
+    }
+    impl_bitflags!(Config3, CONFIG3);
+
+    impl Default for Config3 {
+        fn default() -> Self {
+            Self { 0: 0 }
+        }
+    }
+
+    #[derive(Debug, Default)]
+    pub struct Pers(u8);
+    impl Pers {
+        pub const APERS_MASK: u8 = 0b0000_1111;
+        pub const PPERS_SHIFT: u8 = 4;
+        pub const PPERS_MASK: u8 = 0b1111_0000;
+    }
+    impl_bitflags!(Pers, PERS);
+
     #[derive(Debug, Default)]
     pub struct GConfig1(u8);
     impl GConfig1 {
@@ -371,8 +405,11 @@ pub struct Apds9960<I2C> {
     enable: register::Enable,
     config1: register::Config1,
     config2: register::Config2,
+    config3: register::Config3,
+    pers: register::Pers,
     gconfig1: register::GConfig1,
     gconfig4: register::GConfig4,
+    rotation: u16,
 }
 
 impl<I2C, E> Apds9960<I2C>
@@ -386,8 +423,11 @@ where
             enable: register::Enable::default(),
             config1: register::Config1::default(),
             config2: register::Config2::default(),
+            config3: register::Config3::default(),
+            pers: register::Pers::default(),
             gconfig1: register::GConfig1::default(),
             gconfig4: register::GConfig4::default(),
+            rotation: 0,
         }
     }
 
