@@ -1,7 +1,7 @@
 use hal::i2c;
 use {
-    register::{Config2, Config3, Control, Enable, Pers, Status},
-    Apds9960, BitFlags, Error, Register, DEV_ADDR,
+    register::{Config2, Config3, Enable, Pers, Status},
+    Apds9960, BitFlags, Error, Register,
 };
 
 /// Proximity sensor implementation with comprehensive register access.
@@ -94,16 +94,8 @@ where
         offset_up_right: i8,
         offset_down_left: i8,
     ) -> Result<(), Error<E>> {
-        self.i2c
-            .write(
-                DEV_ADDR,
-                &[
-                    Register::POFFSET_UR,
-                    offset_up_right as u8,
-                    offset_down_left as u8,
-                ],
-            )
-            .map_err(Error::I2C)
+        self.set_proximity_up_right_offset(offset_up_right)?;
+        self.set_proximity_down_left_offset(offset_down_left)
     }
 
     /// Set proximity interrupt persistence.
@@ -179,82 +171,5 @@ where
     pub fn is_proximity_data_valid(&mut self) -> Result<bool, Error<E>> {
         let status = self.read_register(Register::STATUS)?;
         Ok(Status::create(status).is(Status::PVALID, true))
-    }
-
-    /// Set proximity gain.
-    ///
-    /// Value  Gain
-    ///   0       1x
-    ///   1       2x
-    ///   2       4x
-    ///   3       8x
-    pub fn set_proximity_gain(&mut self, gain: u8) -> Result<(), Error<E>> {
-        let mut control = self.read_register(Register::CONTROL)?;
-        control &= 0b11110011;
-        control |= (gain & 0x03) << 2;
-        self.write_register(Register::CONTROL, control)
-    }
-
-    /// Get proximity gain.
-    pub fn get_proximity_gain(&mut self) -> Result<u8, Error<E>> {
-        let control = self.read_register(Register::CONTROL)?;
-        Ok((control >> 2) & 0x03)
-    }
-
-    /// Set LED drive strength for proximity and ALS.
-    ///
-    /// Value    LED Current
-    ///   0        100 mA
-    ///   1         50 mA
-    ///   2         25 mA
-    ///   3         12.5 mA
-    pub fn set_led_drive(&mut self, drive: u8) -> Result<(), Error<E>> {
-        let mut control = self.read_register(Register::CONTROL)?;
-        control &= 0b00111111;
-        control |= (drive & 0x03) << 6;
-        self.write_register(Register::CONTROL, control)
-    }
-
-    /// Get LED drive strength.
-    pub fn get_led_drive(&mut self) -> Result<u8, Error<E>> {
-        let control = self.read_register(Register::CONTROL)?;
-        Ok((control >> 6) & 0x03)
-    }
-
-    /// Set LED boost current.
-    ///
-    /// Value  Boost Current
-    ///   0        100%
-    ///   1        150%
-    ///   2        200%
-    ///   3        300%
-    pub fn set_led_boost(&mut self, boost: u8) -> Result<(), Error<E>> {
-        let mut config2 = self.read_register(Register::CONFIG2)?;
-        config2 &= 0b11001111;
-        config2 |= (boost & 0x03) << 4;
-        self.write_register(Register::CONFIG2, config2)
-    }
-
-    /// Get LED boost current.
-    pub fn get_led_boost(&mut self) -> Result<u8, Error<E>> {
-        let config2 = self.read_register(Register::CONFIG2)?;
-        Ok((config2 >> 4) & 0x03)
-    }
-
-    /// Set proximity pulse count and length.
-    ///
-    /// * `count`: Number of pulses (0-255, typically 8)
-    /// * `length`: Pulse length (0=4μs, 1=8μs, 2=16μs, 3=32μs)
-    pub fn set_proximity_pulse(&mut self, count: u8, length: u8) -> Result<(), Error<E>> {
-        let value = ((length & 0x03) << 6) | (count & 0x3F);
-        self.write_register(Register::PPULSE, value)
-    }
-
-    /// Get proximity pulse settings.
-    pub fn get_proximity_pulse(&mut self) -> Result<(u8, u8), Error<E>> {
-        let value = self.read_register(Register::PPULSE)?;
-        let count = value & 0x3F;
-        let length = (value >> 6) & 0x03;
-        Ok((count, length))
     }
 }

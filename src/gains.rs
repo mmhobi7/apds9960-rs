@@ -1,3 +1,8 @@
+//! Gain control and LED configuration types and methods.
+//!
+//! This module provides type-safe enums for controlling sensor gains and LED settings,
+//! along with methods to configure them on the APDS9960 sensor.
+
 use hal::i2c;
 use {Apds9960, Error, Register};
 

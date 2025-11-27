@@ -462,8 +462,8 @@ where
     }
 }
 
-pub mod gains;
 mod config;
+mod gains;
 mod gesture;
 mod light;
 mod proximity;
