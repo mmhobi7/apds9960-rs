@@ -1,4 +1,4 @@
-use hal::blocking::i2c;
+use hal::i2c;
 use {
     register::{Config2, Config3, Control, Enable, Pers, Status},
     Apds9960, BitFlags, Error, Register, DEV_ADDR,
@@ -7,7 +7,7 @@ use {
 /// Proximity sensor implementation with comprehensive register access.
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::Write<Error = E> + i2c::WriteRead<Error = E>,
+    I2C: i2c::I2c<Error = E>,
 {
     /// Enable proximity detection
     pub fn enable_proximity(&mut self) -> Result<(), Error<E>> {

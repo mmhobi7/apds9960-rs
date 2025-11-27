@@ -1,7 +1,7 @@
 extern crate apds9960;
 use apds9960::GestureDataThreshold;
 extern crate embedded_hal_mock as hal;
-use hal::i2c::Transaction as I2cTrans;
+use hal::eh1::i2c::Transaction as I2cTrans;
 mod common;
 use common::{destroy, new, BitFlags, Register, DEV_ADDR};
 

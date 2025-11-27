@@ -1,4 +1,4 @@
-use hal::blocking::i2c;
+use hal::i2c;
 use {Apds9960, Error, Register};
 
 /// Proximity gain multiplier
@@ -68,7 +68,7 @@ pub enum LedBoost {
 
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::Write<Error = E> + i2c::WriteRead<Error = E>,
+    I2C: i2c::I2c<Error = E>,
 {
     /// Set proximity sensor gain
     pub fn set_proximity_gain(&mut self, gain: ProximityGain) -> Result<(), Error<E>> {

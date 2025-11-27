@@ -1,4 +1,4 @@
-use hal::blocking::i2c;
+use hal::i2c;
 use {
     register::{Config1, Enable},
     Apds9960, BitFlags, Error, Register, DEV_ADDR,
@@ -18,7 +18,7 @@ macro_rules! impl_set_flag_reg {
 /// Common configuration.
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::Write<Error = E> + i2c::WriteRead<Error = E>,
+    I2C: i2c::I2c<Error = E>,
 {
     /// Initialize the sensor with sensible defaults.
     ///

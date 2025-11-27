@@ -1,4 +1,4 @@
-use hal::blocking::i2c;
+use hal::i2c;
 use {Apds9960, Error};
 
 /// Gesture direction codes.
@@ -18,7 +18,7 @@ pub enum Gesture {
 
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::Write<Error = E> + i2c::WriteRead<Error = E>,
+    I2C: i2c::I2c<Error = E>,
 {
     /// Decode a gesture by reading the FIFO data and applying the same algorithm
     /// used in the Python/C++ drivers (filtering, ratios, deltas, then decision tree).

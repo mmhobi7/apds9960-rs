@@ -111,8 +111,6 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! #[macro_use]
-//! extern crate nb;
 //! extern crate apds9960;
 //!
 //! use hal::I2cdev;
@@ -124,7 +122,7 @@
 //! sensor.init().unwrap();
 //! sensor.enable_proximity().unwrap();
 //! loop {
-//!     let prox = block!(sensor.read_proximity()).unwrap();
+//!     let prox = sensor.read_proximity().unwrap();
 //!     println!("Proximity: {}", prox);
 //! }
 //! # }
@@ -134,8 +132,6 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! #[macro_use]
-//! extern crate nb;
 //! extern crate apds9960;
 //!
 //! use hal::I2cdev;
@@ -147,7 +143,7 @@
 //! sensor.init().unwrap();
 //! sensor.enable_light().unwrap();
 //! loop {
-//!     let data = block!(sensor.read_light()).unwrap();
+//!     let data = sensor.read_light().unwrap();
 //!     println!(
 //!         "Clear: {}, Red: {}, Green: {}, Blue: {}",
 //!         data.clear,
@@ -163,8 +159,6 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! #[macro_use]
-//! extern crate nb;
 //! extern crate apds9960;
 //!
 //! use hal::I2cdev;
@@ -179,8 +173,7 @@
 //! loop {
 //!     match sensor.decode_gesture() {
 //!         Ok(gesture) => println!("Gesture: {:?}", gesture),
-//!         Err(nb::Error::WouldBlock) => {},
-//!         Err(nb::Error::Other(e)) => println!("Error: {:?}", e),
+//!         Err(e) => println!("Error: {:?}", e),
 //!     }
 //! }
 //! # }
@@ -190,7 +183,7 @@
 #![no_std]
 
 extern crate embedded_hal as hal;
-use hal::blocking::i2c;
+use hal::i2c;
 extern crate nb;
 
 /// All possible errors in this crate
@@ -446,7 +439,7 @@ pub struct Apds9960<I2C> {
 
 impl<I2C, E> Apds9960<I2C>
 where
-    I2C: i2c::Write<Error = E>,
+    I2C: i2c::I2c<Error = E>,
 {
     /// Create new instance of the APDS9960 device.
     pub fn new(i2c: I2C) -> Self {
