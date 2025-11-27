@@ -492,16 +492,32 @@ where
     pub fn probe(&mut self) -> Result<(), Error<E>> {
         // Perform a zero-length write to check device presence
         // This mimics i2cdetect's behavior for device detection
-        // Do it a couple times, sometimes fails
+        // Do it a couple times, sometimes fails with delays between attempts
         let mut last_error = None;
-        for _ in 0..5 {
+        for attempt in 0..5 {
             match self.i2c.write(DEV_ADDR, &[]) {
                 Ok(()) => return Ok(()),
                 Err(e) => last_error = Some(e),
             }
+            
+            // Add a small delay between probe attempts to avoid overwhelming the bus
+            // Delay increases slightly with each attempt to give the device more time to respond
+            let delay_us = 1000 + (attempt as u32 * 500); // 1ms to 3ms delays
+            self.busy_wait_us(delay_us);
         }
         // If all attempts failed, return the last error
         Err(Error::I2C(last_error.unwrap()))
+    }
+
+    /// Simple busy-wait delay for the specified number of microseconds.
+    /// This is a basic implementation that doesn't require additional traits.
+    fn busy_wait_us(&self, micros: u32) {
+        // Simple busy-wait loop - not precise but sufficient for I2C timing
+        // Assuming ~1ns per iteration on modern processors (rough approximation)
+        let iterations = micros * 1000;
+        for _ in 0..iterations {
+            core::hint::spin_loop();
+        }
     }
 }
 
