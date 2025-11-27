@@ -74,7 +74,7 @@ where
 
     /// Set the gesture proximity exit threshold.
     pub fn set_gesture_proximity_exit_threshold(&mut self, threshold: u8) -> Result<(), Error<E>> {
-        self.write_register(Register::GPEXTH, threshold)
+        self.write_register(Register::GEXTH, threshold)
     }
 
     /// Set the gesture up offset.
@@ -158,9 +158,9 @@ where
             7 => 0b11,
             _ => 0b01, // default to 2
         };
-        let mut gconf1 = self.read_register(Register::GCONFIG1)?;
+        let mut gconf1 = self.read_register(Register::GCONF1)?;
         gconf1 = (gconf1 & 0x9F) | (value << 5);
-        self.write_register(Register::GCONFIG1, gconf1)
+        self.write_register(Register::GCONF1, gconf1)
     }
 
     /// Set gesture exit mask.
@@ -168,9 +168,9 @@ where
     /// Determines which photodiode pairs are included in gesture exit comparison.
     /// * `mask`: Bitmask where bit 0=UD, 1=LR, 2=Both, 3=All
     pub fn set_gesture_exit_mask(&mut self, mask: u8) -> Result<(), Error<E>> {
-        let mut gconf1 = self.read_register(Register::GCONFIG1)?;
+        let mut gconf1 = self.read_register(Register::GCONF1)?;
         gconf1 = (gconf1 & 0xE7) | ((mask & 0x03) << 3);
-        self.write_register(Register::GCONFIG1, gconf1)
+        self.write_register(Register::GCONF1, gconf1)
     }
 
     /// Read gesture enter threshold.
@@ -180,6 +180,6 @@ where
 
     /// Read gesture exit threshold.
     pub fn get_gesture_proximity_exit_threshold(&mut self) -> Result<u8, Error<E>> {
-        self.read_register(Register::GPEXTH)
+        self.read_register(Register::GEXTH)
     }
 }

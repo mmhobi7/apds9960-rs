@@ -232,6 +232,7 @@ impl Register {
     const PERS: u8 = 0x8C;
     const CONFIG1: u8 = 0x8D;
     const PPULSE: u8 = 0x8E;
+    const CONTROL: u8 = 0x8F;
     const CONFIG2: u8 = 0x90;
     const ID: u8 = 0x92;
     const STATUS: u8 = 0x93;
@@ -244,8 +245,8 @@ impl Register {
     const POFFSET_DL: u8 = 0x9E;
     const CONFIG3: u8 = 0x9F;
     const GPENTH: u8 = 0xA0;
-    const GPEXTH: u8 = 0xA1;
-    const GCONFIG1: u8 = 0xA2;
+    const GEXTH: u8 = 0xA1;
+    const GCONF1: u8 = 0xA2;
     const GCONF2: u8 = 0xA3;
     const GOFFSET_U: u8 = 0xA4;
     const GOFFSET_D: u8 = 0xA5;
@@ -370,7 +371,7 @@ mod register {
         pub const GFIFOTH1: u8 = 0b1000_0000;
         pub const GFIFOTH0: u8 = 0b0100_0000;
     }
-    impl_bitflags!(GConfig1, GCONFIG1);
+    impl_bitflags!(GConfig1, GCONF1);
 
     #[derive(Debug, Default)]
     pub struct Status(u8);
