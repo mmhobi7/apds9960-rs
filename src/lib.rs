@@ -492,7 +492,16 @@ where
     pub fn probe(&mut self) -> Result<(), Error<E>> {
         // Perform a zero-length write to check device presence
         // This mimics i2cdetect's behavior for device detection
-        self.i2c.write(DEV_ADDR, &[]).map_err(Error::I2C)
+        // Do it a couple times, sometimes fails
+        let mut last_error = None;
+        for _ in 0..5 {
+            match self.i2c.write(DEV_ADDR, &[]) {
+                Ok(()) => return Ok(()),
+                Err(e) => last_error = Some(e),
+            }
+        }
+        // If all attempts failed, return the last error
+        Err(Error::I2C(last_error.unwrap()))
     }
 }
 
