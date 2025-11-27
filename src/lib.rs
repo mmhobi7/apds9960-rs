@@ -462,8 +462,11 @@ where
     }
 }
 
+pub mod gains;
 mod config;
 mod gesture;
 mod light;
 mod proximity;
 mod reading;
+
+pub use gains::{GestureGain, LedBoost, LedDrive, LightGain, ProximityGain};

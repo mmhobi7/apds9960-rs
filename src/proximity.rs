@@ -21,7 +21,8 @@ where
 
     /// Enable proximity sensor with interrupts
     pub fn enable_proximity_sensor(&mut self, interrupts: bool) -> Result<(), Error<E>> {
-        self.set_proximity_gain(2)?; // Default 4x gain
+        use crate::gains::ProximityGain;
+        self.set_proximity_gain(ProximityGain::X4)?; // Default 4x gain
         if interrupts {
             self.enable_proximity_interrupts()?;
         } else {
